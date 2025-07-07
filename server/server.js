@@ -14,36 +14,16 @@ mongoose.connect("mongodb+srv://yashgithub907:Y%40sh%403097@cluster0.w1mjtna.mon
 // Create or fetch user
 app.post("/user", async (req, res) => {
   const { name, smk, password } = req.body;
+  let user = smk
+    ? await User.findOne({ smk })
+    : await User.findOne({ password });
 
-  // If smk is provided
-  if (smk) {
-    const user = await User.findOne({ smk });
-
-    // SMK found but name does not match
-    if (user && user.name !== name) {
-      return res.status(400).json({ error: "Please enter the correct name." });
-    }
-
-    // SMK not found, create new user
-    if (!user) {
-      const newUser = await User.create({ name, smk, password, goal: 0, readCount: 0 });
-      return res.json(newUser);
-    }
-
-    // SMK and name match, return user
-    return res.json(user);
+  if (!user) {
+    user = await User.create({ name, smk, password, goal: 0, readCount: 0 });
   }
 
-  // If smk not provided, fallback to password
-  const userByPassword = await User.findOne({ password });
-  if (!userByPassword) {
-    const newUser = await User.create({ name, password, goal: 0, readCount: 0 });
-    return res.json(newUser);
-  }
-
-  res.json(userByPassword);
+  res.json(user);
 });
-
 
 // Set goal
 app.post("/set-goal", async (req, res) => {
