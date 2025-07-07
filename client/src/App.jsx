@@ -171,7 +171,8 @@ const App = () => {
               </div>
 
               <div className="mb-1 flex items-center gap-2">
-                <label className="font-semibold">📄 છેલા વાંચેલુ પેજ:</label>
+                <label className="font-semibold">📄 છેલ્લા વાચેલું પેજ
+                  :</label>
                 <input
                   type="text"
                   className="border rounded px-2 py-1 w-24"
