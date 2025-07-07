@@ -18,7 +18,7 @@ const App = () => {
   const [password, setPassword] = useState("");
   const [goal, setGoal] = useState(0);
   const [readCount, setReadCount] = useState(0);
-  const [lastPageRead, setLastPageRead] = useState(1);
+  const [lastPageRead, setLastPageRead] = useState(0);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
@@ -123,16 +123,16 @@ const App = () => {
     <div className="min-h-screen bg-gray-100 p-4 flex justify-center items-start">
       <div className="w-full max-w-3xl bg-white shadow-xl rounded-xl p-4 sm:p-6 transition-all duration-300">
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center text-purple-700 animate-fade-in">
-          📖 Shikshapatri Reading Tracker
+          📖 શિક્ષાપત્રી વાંચન ટ્રેકર
         </h1>
 
         {loading && <Spinner />}
 
         {!loading && step === "login" && (
           <>
-            <input placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full border p-2 mb-3 rounded" />
-            <input placeholder="SMK (if available)" value={smk} onChange={(e) => setSMK(e.target.value)} className="w-full border p-2 mb-3 rounded" />
-            <input placeholder="Password (if no SMK)" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border p-2 mb-4 rounded" />
+            <input placeholder="તમારું નામ" value={name} onChange={(e) => setName(e.target.value)} className="w-full border p-2 mb-3 rounded" />
+            <input placeholder="SMK (જો ઉપલબ્ધ હોય તો)" value={smk} onChange={(e) => setSMK(e.target.value)} className="w-full border p-2 mb-3 rounded" />
+            <input placeholder="પાસવર્ડ (જો SMK ન હોય તો)" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border p-2 mb-4 rounded" />
             <button onClick={login} disabled={btnLoading} className={`w-full bg-purple-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-purple-700"}`}>
               {btnLoading ? "Loading..." : "Continue"}
             </button>
@@ -141,7 +141,8 @@ const App = () => {
 
         {step === "goal" && !loading && (
           <>
-            <p className="mb-2 text-gray-700 text-center font-medium">🙏 Set your reading goal</p>
+            <p className="mb-2 text-gray-700 text-center font-medium">🙏તમારા વાંચન પાઠની સંખ્યા નક્કી કરો
+            </p>
             <input type="number" value={goal} onChange={(e) => setGoal(e.target.value)} className="w-full border p-2 mb-4 rounded" />
             <button onClick={saveGoal} disabled={btnLoading} className={`w-full bg-blue-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}>
               {btnLoading ? "Saving..." : "Set Goal"}
@@ -152,10 +153,10 @@ const App = () => {
         {step === "tracker" && !loading && (
           <>
             <div className="mb-4 text-sm sm:text-base">
-              <p className="mb-1">👤 <strong>Name:</strong> {userData?.name}</p>
-              <p className="mb-1">🎯 <strong>Goal:</strong> {goal}</p>
+              <p className="mb-1">👤 <strong>નામ:</strong> {userData?.name}</p>
+              <p className="mb-1">🎯 <strong>કુલ વાંચન પાઠ (લક્ષ્ય):</strong> {goal}</p>
               <div className="mb-1 flex items-center gap-2">
-                <label className="font-semibold">✅ Read Count:</label>
+                <label className="font-semibold">✅ વાચેલા પઠા:</label>
                 <input
                   type="number"
                   className="border rounded px-2 py-1 w-24"
@@ -164,7 +165,8 @@ const App = () => {
                 />
               </div>
               <div className="mb-1 flex items-center gap-2">
-                <label className="font-semibold">📄 Last Page:</label>
+                <label className="font-semibold">📄 છેલા વાંચેલુ પેજ
+                  :</label>
                 <input
                   type="number"
                   className="border rounded px-2 py-1 w-24"
@@ -172,7 +174,7 @@ const App = () => {
                   onChange={(e) => updateLastPage(Number(e.target.value))}
                 />
               </div>
-              <p className="mb-4">⏳ <strong>Remaining:</strong> {Math.max(goal - readCount, 0)}</p>
+              <p className="mb-4">⏳ <strong>બાકી રહેલા પાઠ ની સંખ્યા:</strong> {Math.max(goal - readCount, 0)}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -184,7 +186,7 @@ const App = () => {
             <div className="w-full flex flex-col items-center">
               <div className="border shadow rounded w-full h-[70vh] sm:h-[75vh] max-w-full overflow-hidden">
                 <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-                  <Viewer fileUrl="/shikshapatri.pdf" initialPage={lastPageRead - 1} />
+                  <Viewer fileUrl="/shikshapatri.pdf" initialPage={lastPageRead + 5} />
                 </Worker>
               </div>
             </div>
