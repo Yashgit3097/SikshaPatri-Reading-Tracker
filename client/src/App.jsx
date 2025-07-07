@@ -56,6 +56,15 @@ const App = () => {
   };
 
   const login = async () => {
+    if (!name.trim()) {
+      alert("કૃપા કરીને નામ દાખલ કરો");
+      return;
+    }
+    if (!smk.trim() && !password.trim()) {
+      alert("SMK અથવા પાસવર્ડ દાખલ કરો");
+      return;
+    }
+
     setBtnLoading(true);
     try {
       const res = await fetch(`${API}/user`, {
@@ -78,6 +87,11 @@ const App = () => {
   };
 
   const saveGoal = async () => {
+    if (!goal || parseInt(goal) <= 0) {
+      alert("મહેરબાની કરીને યોગ્ય લક્ષ્યાંક દાખલ કરો");
+      return;
+    }
+
     setBtnLoading(true);
     const res = await fetch(`${API}/set-goal`, {
       method: "POST",
@@ -135,10 +149,31 @@ const App = () => {
 
         {!loading && step === "login" && (
           <>
-            <input placeholder="તમારું નામ" value={name} onChange={(e) => setName(e.target.value)} className="w-full border p-2 mb-3 rounded" />
-            <input placeholder="SMK (જો ઉપલબ્ધ હોય તો)" value={smk} onChange={(e) => setSMK(e.target.value)} className="w-full border p-2 mb-3 rounded" />
-            <input placeholder="પાસવર્ડ (જો SMK ન હોય તો)" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border p-2 mb-4 rounded" />
-            <button onClick={login} disabled={btnLoading} className={`w-full bg-purple-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-purple-700"}`}>
+            <input
+              placeholder="તમારું નામ"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border p-2 mb-3 rounded"
+              required
+            />
+            <input
+              placeholder="SMK (જો ઉપલબ્ધ હોય તો)"
+              value={smk}
+              onChange={(e) => setSMK(e.target.value)}
+              className="w-full border p-2 mb-3 rounded"
+            />
+            <input
+              placeholder="પાસવર્ડ (જો SMK ન હોય તો)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border p-2 mb-4 rounded"
+            />
+            <button
+              onClick={login}
+              disabled={btnLoading}
+              className={`w-full bg-purple-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-purple-700"
+                }`}
+            >
               {btnLoading ? "Loading..." : "Continue"}
             </button>
           </>
@@ -146,9 +181,23 @@ const App = () => {
 
         {step === "goal" && !loading && (
           <>
-            <p className="mb-2 text-gray-700 text-center font-medium">🙏તમારા વાંચન પાઠની સંખ્યા નક્કી કરો</p>
-            <input type="number" value={goal} onChange={(e) => setGoal(e.target.value)} className="w-full border p-2 mb-4 rounded" />
-            <button onClick={saveGoal} disabled={btnLoading} className={`w-full bg-blue-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}>
+            <p className="mb-2 text-gray-700 text-center font-medium">
+              🙏તમારા વાંચન પાઠની સંખ્યા નક્કી કરો
+            </p>
+            <input
+              type="number"
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              className="w-full border p-2 mb-4 rounded"
+              required
+              min={1}
+            />
+            <button
+              onClick={saveGoal}
+              disabled={btnLoading}
+              className={`w-full bg-blue-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"
+                }`}
+            >
               {btnLoading ? "Saving..." : "Set Goal"}
             </button>
           </>
@@ -171,8 +220,7 @@ const App = () => {
               </div>
 
               <div className="mb-1 flex items-center gap-2">
-                <label className="font-semibold">📄 છેલ્લા વાચેલું પેજ
-                  :</label>
+                <label className="font-semibold">📄 છેલ્લે વાંચેલું પેજ:</label>
                 <input
                   type="text"
                   className="border rounded px-2 py-1 w-24"
