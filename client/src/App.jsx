@@ -18,7 +18,8 @@ const App = () => {
   const [password, setPassword] = useState("");
   const [goal, setGoal] = useState(0);
   const [readCount, setReadCount] = useState(0);
-  const [lastPageRead, setLastPageRead] = useState(0);
+  const [lastPageRead, setLastPageRead] = useState(1);
+  const [tempLastPage, setTempLastPage] = useState("1");
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
@@ -46,6 +47,7 @@ const App = () => {
       setReadCount(data.readCount || 0);
       setGoal(data.goal || 0);
       setLastPageRead(data.lastPageRead || 1);
+      setTempLastPage(String(data.lastPageRead || 1));
       setStep(data.goal > 0 ? "tracker" : "goal");
     } catch {
       alert("Auto login failed.");
@@ -66,6 +68,7 @@ const App = () => {
       setReadCount(data.readCount || 0);
       setGoal(data.goal || 0);
       setLastPageRead(data.lastPageRead || 1);
+      setTempLastPage(String(data.lastPageRead || 1));
       setStep(data.goal > 0 ? "tracker" : "goal");
       localStorage.setItem("shikshapatri-user", JSON.stringify({ name, smk, password }));
     } catch {
@@ -98,8 +101,9 @@ const App = () => {
   };
 
   const updateLastPage = async (page) => {
-    if (page < 1) return;
+    if (isNaN(page) || page < 1) return;
     setLastPageRead(page);
+    setTempLastPage(String(page));
     await fetch(`${API}/update-last-page`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -116,6 +120,7 @@ const App = () => {
     setGoal(0);
     setReadCount(0);
     setLastPageRead(1);
+    setTempLastPage("1");
     setUserData(null);
   };
 
@@ -141,8 +146,7 @@ const App = () => {
 
         {step === "goal" && !loading && (
           <>
-            <p className="mb-2 text-gray-700 text-center font-medium">🙏તમારા વાંચન પાઠની સંખ્યા નક્કી કરો
-            </p>
+            <p className="mb-2 text-gray-700 text-center font-medium">🙏તમારા વાંચન પાઠની સંખ્યા નક્કી કરો</p>
             <input type="number" value={goal} onChange={(e) => setGoal(e.target.value)} className="w-full border p-2 mb-4 rounded" />
             <button onClick={saveGoal} disabled={btnLoading} className={`w-full bg-blue-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}>
               {btnLoading ? "Saving..." : "Set Goal"}
@@ -155,6 +159,7 @@ const App = () => {
             <div className="mb-4 text-sm sm:text-base">
               <p className="mb-1">👤 <strong>નામ:</strong> {userData?.name}</p>
               <p className="mb-1">🎯 <strong>કુલ વાંચન પાઠ (લક્ષ્ય):</strong> {goal}</p>
+
               <div className="mb-1 flex items-center gap-2">
                 <label className="font-semibold">✅ વાચેલા પઠા:</label>
                 <input
@@ -164,16 +169,29 @@ const App = () => {
                   onChange={(e) => updateCount(Number(e.target.value))}
                 />
               </div>
+
               <div className="mb-1 flex items-center gap-2">
-                <label className="font-semibold">📄 છેલા વાંચેલુ પેજ
-                  :</label>
+                <label className="font-semibold">📄 છેલા વાંચેલુ પેજ:</label>
                 <input
-                  type="number"
+                  type="text"
                   className="border rounded px-2 py-1 w-24"
-                  value={lastPageRead}
-                  onChange={(e) => updateLastPage(Number(e.target.value))}
+                  value={tempLastPage}
+                  onChange={(e) => setTempLastPage(e.target.value)}
+                  onBlur={() => {
+                    const num = parseInt(tempLastPage);
+                    if (!isNaN(num) && num >= 1) updateLastPage(num);
+                    else setTempLastPage(String(lastPageRead));
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const num = parseInt(tempLastPage);
+                      if (!isNaN(num) && num >= 1) updateLastPage(num);
+                      else setTempLastPage(String(lastPageRead));
+                    }
+                  }}
                 />
               </div>
+
               <p className="mb-4">⏳ <strong>બાકી રહેલા પાઠ ની સંખ્યા:</strong> {Math.max(goal - readCount, 0)}</p>
             </div>
 
