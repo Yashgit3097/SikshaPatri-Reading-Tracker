@@ -7,7 +7,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect("mongodb://localhost:27017/shikshapatri");
+mongoose.connect("mongodb+srv://yashgithub907:Y%40sh%403097@cluster0.w1mjtna.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Create or fetch user
 app.post("/user", async (req, res) => {
