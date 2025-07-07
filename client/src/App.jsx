@@ -161,7 +161,7 @@ const App = () => {
               <p className="mb-1">🎯 <strong>કુલ વાંચન પાઠ (લક્ષ્ય):</strong> {goal}</p>
 
               <div className="mb-1 flex items-center gap-2">
-                <label className="font-semibold">✅ વાચેલા પઠા:</label>
+                <label className="font-semibold">✅ વાચેલા પાઠ:</label>
                 <input
                   type="number"
                   className="border rounded px-2 py-1 w-24"
