@@ -36,6 +36,21 @@ app.post("/set-goal", async (req, res) => {
   } else res.status(404).json({ error: "User not found" });
 });
 
+// Update last page read
+app.post("/update-last-page", async (req, res) => {
+  const { smk, password, lastPageRead } = req.body;
+  const user = await User.findOne(smk ? { smk } : { password });
+
+  if (user) {
+    user.lastPageRead = lastPageRead;
+    await user.save();
+    res.json(user);
+  } else {
+    res.status(404).json({ error: "User not found" });
+  }
+});
+
+
 // Update read count
 app.post("/update-count", async (req, res) => {
   const { smk, password, count } = req.body;
