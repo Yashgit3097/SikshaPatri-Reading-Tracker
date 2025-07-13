@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 
-const API = "https://sikshapatri-reading-tracker.onrender.com";
+const API = "http://localhost:5000";
 
 const Spinner = () => (
   <div className="flex justify-center items-center py-6">
@@ -11,18 +11,20 @@ const Spinner = () => (
 );
 
 const App = () => {
-  const viewerRef = useRef(null);
   const [step, setStep] = useState("login");
   const [name, setName] = useState("");
   const [smk, setSMK] = useState("");
   const [password, setPassword] = useState("");
   const [goal, setGoal] = useState(0);
   const [readCount, setReadCount] = useState(0);
+  const [audioListenCount, setAudioListenCount] = useState(0);
   const [lastPageRead, setLastPageRead] = useState(1);
   const [tempLastPage, setTempLastPage] = useState("1");
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
+
+  const audioRef = useRef(null);
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("shikshapatri-user"));
@@ -45,6 +47,7 @@ const App = () => {
       setSMK(data.smk || "");
       setPassword(data.password || "");
       setReadCount(data.readCount || 0);
+      setAudioListenCount(data.audioListenCount || 0);
       setGoal(data.goal || 0);
       setLastPageRead(data.lastPageRead || 1);
       setTempLastPage(String(data.lastPageRead || 1));
@@ -56,14 +59,9 @@ const App = () => {
   };
 
   const login = async () => {
-    if (!name.trim()) {
-      alert("કૃપા કરીને નામ દાખલ કરો");
-      return;
-    }
-    if (!smk.trim() && !password.trim()) {
-      alert("SMK અથવા પાસવર્ડ દાખલ કરો");
-      return;
-    }
+    if (!name.trim()) return alert("કૃપા કરીને નામ દાખલ કરો");
+    if (!smk.trim() && !password.trim())
+      return alert("SMK અથવા પાસવર્ડ દાખલ કરો");
 
     setBtnLoading(true);
     try {
@@ -75,11 +73,15 @@ const App = () => {
       const data = await res.json();
       setUserData(data);
       setReadCount(data.readCount || 0);
+      setAudioListenCount(data.audioListenCount || 0);
       setGoal(data.goal || 0);
       setLastPageRead(data.lastPageRead || 1);
       setTempLastPage(String(data.lastPageRead || 1));
       setStep(data.goal > 0 ? "tracker" : "goal");
-      localStorage.setItem("shikshapatri-user", JSON.stringify({ name, smk, password }));
+      localStorage.setItem(
+        "shikshapatri-user",
+        JSON.stringify({ name, smk, password })
+      );
     } catch {
       alert("Login failed.");
     }
@@ -87,10 +89,8 @@ const App = () => {
   };
 
   const saveGoal = async () => {
-    if (!goal || parseInt(goal) <= 0) {
-      alert("મહેરબાની કરીને યોગ્ય લક્ષ્યાંક દાખલ કરો");
-      return;
-    }
+    if (!goal || parseInt(goal) <= 0)
+      return alert("મહેરબાની કરીને યોગ્ય લક્ષ્યાંક દાખલ કરો");
 
     setBtnLoading(true);
     const res = await fetch(`${API}/set-goal`, {
@@ -114,6 +114,21 @@ const App = () => {
     });
   };
 
+  const updateAudioCount = async (newCount) => {
+    if (newCount === "") {
+      setAudioListenCount("");
+      return;
+    }
+    const num = parseInt(newCount);
+    if (isNaN(num) || num < 0) return;
+    setAudioListenCount(num);
+    await fetch(`${API}/update-audio-count`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ smk, password, audioListenCount: num }),
+    });
+  };
+
   const updateLastPage = async (page) => {
     if (isNaN(page) || page < 1) return;
     setLastPageRead(page);
@@ -133,6 +148,7 @@ const App = () => {
     setPassword("");
     setGoal(0);
     setReadCount(0);
+    setAudioListenCount(0);
     setLastPageRead(1);
     setTempLastPage("1");
     setUserData(null);
@@ -140,8 +156,8 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 flex justify-center items-start">
-      <div className="w-full max-w-3xl bg-white shadow-xl rounded-xl p-4 sm:p-6 transition-all duration-300">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center text-purple-700 animate-fade-in">
+      <div className="w-full max-w-3xl bg-white shadow-xl rounded-xl p-4 sm:p-6">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center text-purple-700">
           📖 શિક્ષાપત્રી વાંચન ટ્રેકર
         </h1>
 
@@ -171,7 +187,7 @@ const App = () => {
             <button
               onClick={login}
               disabled={btnLoading}
-              className={`w-full bg-purple-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-purple-700"
+              className={`w-full bg-purple-600 text-white py-2 rounded ${btnLoading ? "opacity-60" : "hover:bg-purple-700"
                 }`}
             >
               {btnLoading ? "Loading..." : "Continue"}
@@ -181,9 +197,7 @@ const App = () => {
 
         {step === "goal" && !loading && (
           <>
-            <p className="mb-2 text-gray-700 text-center font-medium">
-              🙏તમારા વાંચન પાઠની સંખ્યા નક્કી કરો
-            </p>
+            <p className="mb-2 text-center">🙏તમારા વાંચન પાઠની સંખ્યા નક્કી કરો</p>
             <input
               type="number"
               value={goal}
@@ -195,7 +209,7 @@ const App = () => {
             <button
               onClick={saveGoal}
               disabled={btnLoading}
-              className={`w-full bg-blue-600 text-white py-2 rounded transition-all ${btnLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"
+              className={`w-full bg-blue-600 text-white py-2 rounded ${btnLoading ? "opacity-60" : "hover:bg-blue-700"
                 }`}
             >
               {btnLoading ? "Saving..." : "Set Goal"}
@@ -207,7 +221,7 @@ const App = () => {
           <>
             <div className="mb-4 text-sm sm:text-base">
               <p className="mb-1">👤 <strong>નામ:</strong> {userData?.name}</p>
-              <p className="mb-1">🎯 <strong>કુલ વાંચન પાઠ (લક્ષ્ય):</strong> {goal}</p>
+              <p className="mb-1">🎯 <strong>લક્ષ્યાંક:</strong> {goal}</p>
 
               <div className="mb-1 flex items-center gap-2">
                 <label className="font-semibold">✅ વાચેલા પાઠ:</label>
@@ -241,7 +255,21 @@ const App = () => {
                 />
               </div>
 
-              <p className="mb-4">⏳ <strong>બાકી રહેલા પાઠ ની સંખ્યા:</strong> {Math.max(goal - readCount, 0)}</p>
+              <div className="mb-1 flex items-center gap-2">
+                <label className="font-semibold">🎧 ગુજ. ઓડિયો સાંભળ્યું:</label>
+                <input
+                  type="number"
+                  className="border rounded px-2 py-1 w-24"
+                  value={audioListenCount}
+                  onChange={(e) => setAudioListenCount(e.target.value)}
+                  onBlur={() => updateAudioCount(audioListenCount)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") updateAudioCount(audioListenCount);
+                  }}
+                />
+              </div>
+
+              <p className="mb-4">⏳ <strong>બાકી રહેલા પાઠ:</strong> {Math.max(goal - readCount, 0)}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -251,11 +279,28 @@ const App = () => {
             </div>
 
             <div className="w-full flex flex-col items-center">
-              <div className="border shadow rounded w-full h-[70vh] sm:h-[75vh] max-w-full overflow-hidden">
+
+              <audio
+                ref={audioRef}
+                controls
+                src="/ShikshapatriGujarati.mp3"
+                className="w-full m-4"
+              />
+              <div className="border shadow rounded w-full h-[70vh] max-w-full overflow-hidden">
                 <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-                  <Viewer fileUrl="/shikshapatri.pdf" initialPage={lastPageRead + 5} />
+                  <Viewer
+                    fileUrl="/shikshapatri.pdf"
+                    initialPage={lastPageRead + 5}
+                  />
                 </Worker>
               </div>
+
+              <audio
+                ref={audioRef}
+                controls
+                src="/ShikshapatriGujarati.mp3"
+                className="w-full mt-4"
+              />
             </div>
           </>
         )}

@@ -50,7 +50,22 @@ app.post("/update-last-page", async (req, res) => {
   }
 });
 
+app.post("/update-audio-count", async (req, res) => {
+  const { smk, password, audioListenCount } = req.body;
+  const user = await User.findOne(smk ? { smk } : { password });
 
+  if (user) {
+    if (typeof audioListenCount === "number") {
+      user.audioListenCount = audioListenCount; // manual update
+    } else {
+      user.audioListenCount = (user.audioListenCount || 0) + 1; // auto +1 on ended
+    }
+    await user.save();
+    res.json({ audioListenCount: user.audioListenCount });
+  } else {
+    res.status(404).json({ error: "User not found" });
+  }
+});
 // Update read count
 app.post("/update-count", async (req, res) => {
   const { smk, password, count } = req.body;

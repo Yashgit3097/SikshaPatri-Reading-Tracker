@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema({
   password: String,
   goal: Number,
   readCount: { type: Number, default: 0 },
-  lastPageRead: { type: Number, default: 0 } // 👈 New field
+  lastPageRead: { type: Number, default: 0 }, // 👈 New field
+ audioListenCount: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model("User", userSchema);
