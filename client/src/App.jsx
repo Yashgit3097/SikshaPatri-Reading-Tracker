@@ -295,12 +295,6 @@ const App = () => {
                 </Worker>
               </div>
 
-              <audio
-                ref={audioRef}
-                controls
-                src="/ShikshapatriGujarati.mp3"
-                className="w-full mt-4"
-              />
             </div>
           </>
         )}
