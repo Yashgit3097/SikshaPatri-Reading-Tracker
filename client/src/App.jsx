@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 
-const API = "http://localhost:5000";
+const API = "https://sikshapatri-reading-tracker.onrender.com";
 
 const Spinner = () => (
   <div className="flex justify-center items-center py-6">
